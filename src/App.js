@@ -8,6 +8,7 @@ import {
   Header,
   Icon,
   Table,
+  Input,
 } from "semantic-ui-react";
 import "./App.css";
 
@@ -15,31 +16,33 @@ function App() {
   const [phoneNo, setPhoneNo] = useState(""); //phone no
   const [isAlreadyBooked, setIsAlreadyBooked] = useState(false); // checkbox flag
   const [isSubmit, setIsSubmit] = useState(false); // modal flag
-  const [isPhoneNoError, setIsPhoneNoError] = useState(false); // phone no validation
+  const [isPhoneNoEmpty, setIsPhoneNoEmpty] = useState(false); // phone no validation
   const [phoneNumberErrorMessage, setPhoneNumberErrorMessage] = useState("");
   const [noBookingFlag, setNoBookingFlag] = useState(false);
   const regexCheck = /^[6789]\d{9}$/;
   const resetValues = () => {
     setPhoneNo("");
     setIsAlreadyBooked(false);
-    setIsPhoneNoError(false);
+    setIsPhoneNoEmpty(false);
   };
   const handlePhoneNumberChange = (e) => {
     const re = /^[0-9\b]+$/;
-
+    console.log(e.target.value);
     // if value is not blank, then test the regex
 
     if (e.target.value === "" || re.test(e.target.value)) {
-      console.log("Here");
-      setIsPhoneNoError(false);
+      setIsPhoneNoEmpty(false);
       setPhoneNo(e.target.value);
-      if (!regexCheck.test(e.target.value) && e.target.value.length > 10) {
-        setPhoneNumberErrorMessage("Phone number exceeds 10 digits");
+      if (!regexCheck.test(e.target.value)) {
+        setIsPhoneNoEmpty(true);
+        if (e.target.value.length > 10) {
+          setPhoneNumberErrorMessage("Phone number exceeds 10 digits");
+        } else if (e.target.value.length < 10) {
+          setPhoneNumberErrorMessage("Phone number must be 10 digits");
+        }
       }
     }
     // phone number change
-    setIsPhoneNoError(false);
-    setPhoneNo(e.target.value);
   };
   const handleCheckboxChange = () => {
     // checkbox api call
@@ -57,9 +60,10 @@ function App() {
   const handleSubmit = () => {
     // api integration
     if (!phoneNo) {
-      setIsPhoneNoError(true);
+      setIsPhoneNoEmpty(true);
+      setPhoneNumberErrorMessage("Phone number should not be empty");
     } else {
-      setIsPhoneNoError(false);
+      setIsPhoneNoEmpty(false);
       setIsSubmit(true);
       console.log(
         `Phone number is ${phoneNo}. Is it checked? ${isAlreadyBooked}`
@@ -147,17 +151,18 @@ function App() {
                     className="ui description"
                     style={{ margin: "20px 0 0" }}
                   >
-                    <input
-                      className="ui input"
+                    <Input
+                      placeholder="Enter phone number..."
                       type="text"
                       name="phoneNo"
                       value={phoneNo}
+                      error={isPhoneNoEmpty}
                       onChange={handlePhoneNumberChange}
                     />
                     <div className="ui description">
-                      {isPhoneNoError && (
+                      {isPhoneNoEmpty && (
                         <div class="ui pointing label">
-                          Please enter your Phone Number
+                          {phoneNumberErrorMessage}
                         </div>
                       )}
                       <Checkbox
